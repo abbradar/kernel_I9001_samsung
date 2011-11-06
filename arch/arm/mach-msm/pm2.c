@@ -1841,11 +1841,11 @@ static int msm_reboot_call
 		if (!strcmp(cmd, "bootloader")) {
 			restart_reason = 0x77665500;
 		} else if (!strcmp(cmd, "recovery")) {
-			set_recovery_mode();
+//			set_recovery_mode();
 			restart_reason = 0x77665502;
 		} else if (!strcmp(cmd, "recovery_done")) { 
             printk("recovery_done \n");
-            set_recovery_mode_done();
+//            set_recovery_mode_done();
 			restart_reason = 0x77665503;
 		} else if (!strcmp(cmd, "download")) {
 			restart_reason = 0x776655FF;
