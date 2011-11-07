@@ -21,7 +21,6 @@
  * and <linux/sched.h> loads <linux/kernel.h>
  */
 
-#define DEBUG 1
 #include <linux/device.h>
 
 #define MAX17043_FUEL_GAUGE		// Support low battery alert
@@ -65,11 +64,6 @@ extern int charging_boot;
 
 static struct wake_lock vbus_wake_lock;
 
-
-#ifdef DEBUG
-#undef pr_debug
-#define pr_debug pr_info
-#endif
 
 #ifdef CONFIG_MAX17043_FUEL_GAUGE
 #include <linux/delay.h>
@@ -1135,7 +1129,7 @@ static int msm_batt_average_temperature(int temp_adc)
 		return 0;
 
 	if (count == 0 && temp_adc == 150)
-		return 0;	// hanapark: 부팅 초기 vbatt task 초기화 이전 값은 무시하도록 방어 코드 추가 
+		return 0;	// hanapark: \BA\CE\C6\C3 \C3珂\E2 vbatt task \C3珂\E2화 \C0\CC\C0\FC \B0\AA\C0\BA \B9\AB\BD\C3\C7溝\B5\B7\CF \B9\E6\BE\EE \C4湄\E5 \C3煞\A1 
 
 #ifdef __BATT_TEST_DEVICE__
 		if (temp_test_adc)
@@ -1445,8 +1439,10 @@ static void msm_batt_update_psy_status(void)
 	/* Check what is changed */
 
 	/* check temperature */
-//	msm_batt_info.battery_temp_adc = msm_batt_average_temperature(battery_temp_adc);	
-	status_changed += msm_batt_control_temperature(msm_batt_info.battery_temp_adc);
+//	msm_batt_info.battery_temp_adc = msm_batt_average_temperature(battery_temp_adc);
+	
+
+	status_changed += msm_batt_control_temperature(msm_batt_info.battery_temp_adc);
 
 	/* check full charging */
 	msm_batt_info.chg_current_adc = msm_batt_average_chg_current(chg_current_adc);
@@ -1464,17 +1460,15 @@ static void msm_batt_update_psy_status(void)
 	else
 		msm_batt_info.batt_temp_check = 0;
 
-#ifndef DEBUG
 	if (msm_batt_info.charging_source != NO_CHG)
-#endif
 	{
-		pr_info("[BATT] %s: charger_status=%d, charger_type=%d, battery_status=%d, battery_temp_adc=%d, chg_current=%d, wc_adc=%d\n",
+		pr_debug("[BATT] %s: charger_status=%d, charger_type=%d, battery_status=%d, battery_temp_adc=%d, chg_current=%d, wc_adc=%d\n",
 			__func__, charger_status, charger_type, battery_status, msm_batt_info.battery_temp_adc, msm_batt_info.chg_current_adc, msm_batt_info.wc_adc);
 	}
 
 	if (status_changed)
 	{
-		pr_info("[BATT] %s: power_supply_changed !\n", __func__);
+		pr_debug("[BATT] %s: power_supply_changed !\n", __func__);
 		power_supply_changed(&msm_psy_batt);
 	}
 

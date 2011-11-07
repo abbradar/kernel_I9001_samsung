@@ -170,7 +170,7 @@ unsigned int fg_read_soc(void)
 	if (FGSOC < 0)
 		FGSOC = 0;
 
-	printk("[MAX17043] FGPureSOC = %d (%d.%d)\tFGAdjustSOC = %d\tFGSOC = %d\n", FGPureSOC, data[0], (data[1]*100)/256, FGAdjustSOC, FGSOC); 
+	pr_debug("[MAX17043] FGPureSOC = %d (%d.%d)\tFGAdjustSOC = %d\tFGSOC = %d\n", FGPureSOC, data[0], (data[1]*100)/256, FGAdjustSOC, FGSOC); 
 
 	return FGSOC;
 }
