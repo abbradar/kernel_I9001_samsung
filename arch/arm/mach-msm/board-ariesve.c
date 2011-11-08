@@ -7844,7 +7844,7 @@ static void __init msm7x30_map_io(void)
 	msm7x30_allocate_memory_regions();
 }
 
-MACHINE_START(ARIESVE, "GT-I9001 Board")
+MACHINE_START(ARIESVE, "GalaxySPlus GT-I9001 Board")
 #ifdef CONFIG_MSM_DEBUG_UART
 	.phys_io  = MSM_DEBUG_UART_PHYS,
 	.io_pg_offst = ((MSM_DEBUG_UART_BASE) >> 18) & 0xfffc,
