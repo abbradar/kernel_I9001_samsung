@@ -1,3 +1,4 @@
+
 # Makefile for the Linux Dpram drivers.
 
 # Each configuration option enables a list of files.
@@ -7,7 +8,7 @@
 #endif
 
 # FSR base module
-obj-m			+= sec_param.o
+obj-$(CONFIG_MSM_PARAM)			+= sec_param.o
 
 # Should keep the build sequence. (fsr_base -> bml_block)
 sec_param-objs	+= param.o

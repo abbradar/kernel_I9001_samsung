@@ -115,5 +115,5 @@ obj-$(CONFIG_VLYNQ)		+= vlynq/
 obj-$(CONFIG_STAGING)		+= staging/
 obj-y				+= platform/
 obj-y				+= ieee802154/
-obj-y				+= dpram/
-obj-m				+= param/
+obj-$(CONFIG_DPRAM)		+= dpram/
+obj-$(CONFIG_MSM_PARAM)		+= param/

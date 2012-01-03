@@ -1,4 +1,3 @@
-
 #include <linux/module.h>
 #include <linux/moduleparam.h>
 #include <linux/init.h>
@@ -29,8 +28,6 @@
 #include <asm/segment.h>
 #include <asm/uaccess.h>
 #include <linux/buffer_head.h>
-
-
 
 #define FSR_PROC_DIR "LinuStoreIII"
 struct proc_dir_entry *fsr_proc_dir;
@@ -152,7 +149,7 @@ static int param_write_proc_debug(struct file *file, const char *buffer,
 	filp = filp_open("/dev/block/mmcblk0p14", O_RDWR, 0666);
 	if (IS_ERR(filp)) {
 		printk("file open error\n");
-		return;
+		return 1;
 	}
 
 	memset(mBuf, 0xff, PARAM_SIZE);
@@ -187,12 +184,7 @@ static int param_write_proc_debug(struct file *file, const char *buffer,
 
 }
 
-
-
-
-extern int (*set_recovery_mode)(void);
-     
-int _set_recovery_mode(void)
+static int _set_reboot_mode(int mode)
 {
        struct file *filp;
      	PARAM param;
@@ -205,7 +197,7 @@ int _set_recovery_mode(void)
 	filp = filp_open("/dev/block/mmcblk0p14", O_RDWR, 0666);
 	if (IS_ERR(filp)) {
 		printk("file open error\n");
-		return;
+		return 1;
 	}
 
 	memset(mBuf, 0xff, PARAM_SIZE);
@@ -220,7 +212,7 @@ int _set_recovery_mode(void)
 
 	memcpy(&param, mBuf, sizeof(PARAM));
 	// copy user data to efs
-	param.booting_now = RECOVERY_ENTER_MODE;
+	param.booting_now = mode;
 	memcpy(mBuf,&param,sizeof(PARAM));
 
 	// read first block from param block
@@ -234,20 +226,32 @@ int _set_recovery_mode(void)
       filp_close(filp, current->files);
 
 	return 0;
-
 }
 
+extern int (*set_recovery_mode)(void);
+     
+int _set_recovery_mode(void)
+{
+  return _set_reboot_mode(RECOVERY_ENTER_MODE);
+}
+
+extern int (*set_recovery_mode_done)(void);
+
+int _set_recovery_mode_done(void)
+{
+  return _set_reboot_mode(RECOVERY_END_MODE);
+}
 
 static int __init param_init(void)
 {
-
 	struct proc_dir_entry *ent;
 
+	printk(KERN_INFO "msm_param init\n");
 	fsr_proc_dir = proc_mkdir(FSR_PROC_DIR, NULL);
 	if (!fsr_proc_dir)
 	{
-		printk("proc_mkdir FAIL!\n");
-	        return NULL;
+		printk(KERN_ALERT "proc_mkdir FAIL!\n");
+	        return 1;
 	}
 
 	ent = create_proc_entry("efs_info", S_IFREG | S_IWUSR | S_IRUGO, fsr_proc_dir);
@@ -255,7 +259,8 @@ static int __init param_init(void)
 	ent->write_proc = param_write_proc_debug;
 
 	set_recovery_mode = _set_recovery_mode;
-
+	set_recovery_mode_done = _set_recovery_mode_done;
+	
 	return 0;
 
 }
@@ -268,7 +273,11 @@ static void __exit param_exit(void)
 
 }
 
+#ifdef MODULE
 module_init(param_init);
+#else
+late_initcall(param_init);
+#endif
 module_exit(param_exit);
 
 MODULE_LICENSE("GPL");

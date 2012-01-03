@@ -1800,12 +1800,13 @@ static void msm_pm_power_off(void)
 static void msm_pm_restart(char str, const char *cmd)
 {
 	void __iomem *reset_base;
+	printk(KERN_INFO "pm2.c (msm_pm_restart) reason %X\n", restart_reason);
 	reset_base = ioremap(RESET_ALL, PAGE_SIZE);
 
 	msm_rpcrouter_close();
 	/* debug level value set to 0 to avoid entering silent reset mode when restarting */
 	smem_flag->info = 0x0;
-	printk("send PCOM_RESET_CHIP\n");
+	printk(KERN_INFO "send PCOM_RESET_CHIP\n");
 	printk(KERN_INFO "pm2.c (msm_pm_restart) ROUTER is CLOSED\n"); 
 
 	//power reset error fatal ߻, Ŀ ġ ö ӽ patch 
@@ -1814,7 +1815,7 @@ static void msm_pm_restart(char str, const char *cmd)
 
 	power_off_done = 1;
 	printk(KERN_INFO "pm2.c (msm_pm_restart) PCOM_RESET_CHIP is SENT\n");
-	printk("Do Nothing!!\n");
+	printk(KERN_INFO "Do Nothing!!\n");
 
 	/* block irq after machine off 2011-05-17 hc.hyun */
 	spin_lock_irq(&msm_reboot_lock);
@@ -1835,17 +1836,19 @@ static void msm_pm_restart(char str, const char *cmd)
 static int msm_reboot_call
 	(struct notifier_block *this, unsigned long code, void *_cmd)
 {
-    printk("msm_reboot_call++\n");	
 	if ((code == SYS_RESTART) && _cmd) {
 		char *cmd = _cmd;
+		printk("msm_reboot_call++ cmd: %s\n", cmd);
 		if (!strcmp(cmd, "bootloader")) {
 			restart_reason = 0x77665500;
 		} else if (!strcmp(cmd, "recovery")) {
-//			set_recovery_mode();
+			// if (set_recovery_mode)
+			//  set_recovery_mode();
 			restart_reason = 0x77665502;
 		} else if (!strcmp(cmd, "recovery_done")) { 
-            printk("recovery_done \n");
-//            set_recovery_mode_done();
+      printk("recovery_done \n");
+      if (set_recovery_mode_done)
+        set_recovery_mode_done();
 			restart_reason = 0x77665503;
 		} else if (!strcmp(cmd, "download")) {
 			restart_reason = 0x776655FF;
